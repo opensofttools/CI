@@ -1,0 +1,51 @@
+dn: dc=example,dc=org
+objectclass: dcObject
+objectclass: organization
+o: SYS.Inc
+
+dc: root
+dn: cn=root,dc=example,dc=org
+objectclass: organizationalRole
+
+dn: cn=search,dc=example,dc=org
+objectClass: inetOrgPerson
+sn: search
+SEARCH_userPassword: 123456
+
+dn: ou=people,dc=example,dc=org
+objectClass: organizationalUnit
+ou: people
+
+dn: ou=group,dc=example,dc=org
+objectClass: organizationalUnit
+ou: group
+
+dn: cn=sudogroup,ou=group,dc=example,dc=org
+objectClass: posixGroup
+gidNumber: 10001
+cn: sudogroup
+
+dn: cn=rootgroup,ou=group,dc=example,dc=org
+objectClass: posixGroup
+gidNumber: 10000
+cn: rootgroup
+
+#dn: cn=root,ou=people,dc=example,dc=org
+#objectClass: posixAccount
+#objectClass: inetOrgPerson
+#objectClass: organizationalPerson
+#objectClass: person
+#objectClass: shadowAccount
+#loginShell: /bin/bash
+#homeDirectory: /root
+#uid: root
+#cn: root
+#sn: root
+#uidNumber: 10000
+#gidNumber: 10000
+#ROOT_userPassword: 123456
+
+dn: cn=group,ou=group,dc=example,dc=org
+objectClass: posixGroup
+gidNumber: 10002
+cn: group
