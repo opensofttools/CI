@@ -1,0 +1,26 @@
+version: '2.1'
+
+services:
+
+
+  openldap:
+    container_name: openldap
+    hostname: openldap.example.org
+    image: openldap:2.4.45
+    restart: always
+#    environment:
+#      - "LDAP_BASE=dc=example,dc=com"
+#      - "LDAP_ROOT=cn=user,dc=example,dc=com"
+#      - "LDAP_ROOT_PASSWORD=user"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "10"
+    ports:
+      - "389:389"
+      - "636:636"
+    volumes:
+      - "/data/docker/volumes/openldap/conf:/etc/openldap/conf"
+      - "/data/docker/volumes/openldap/data:/etc/openldap/data"
+      - "/data/docker/volumes/openldap/log:/etc/openldap/log"
