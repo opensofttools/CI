@@ -18,8 +18,8 @@ services:
         max-size: "100m"
         max-file: "10"
     ports:
-      - "8100:80"
-      - "1443:443"
+      - "38080:80"
+      - "30443:443"
 #    volumes:
 #      - "/data/docker/volumes/openldap/conf:/etc/openldap/conf"
 #      - "/data/docker/volumes/openldap/data:/etc/openldap/data"

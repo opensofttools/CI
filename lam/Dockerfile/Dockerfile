@@ -8,9 +8,6 @@ ENV LAM=6.3
 
 VOLUME ["/etc/lam/"]
 
-#wget https://jaist.dl.sourceforge.net/project/lam/LAM/6.3/ldap-account-manager-6.3.tar.bz2
-ADD ldap-account-manager-6.3.tar.bz2 /tmp
-
 RUN set -x \
  && addgroup www \
  && adduser -D -G www www \
