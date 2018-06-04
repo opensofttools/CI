@@ -90,31 +90,25 @@ replace_conf_file(){
 }
 
 add_user(){
-    if [ -e ${OPENLDAP_CONFIG_DIR}/load_base_ldif ];then
-        echo "base file already load"
-        exit 0
+    if [ ! -e ${OPENLDAP_CONFIG_DIR}/base.ldif ];then
+        mkdir ${OPENLDAP_CONFIG_DIR} -p
+        cp /usr/local/openldap-2.4.45/etc/openldap/base.ldif ${OPENLDAP_CONFIG_DIR}/
+        sed -i "s@cn=root,dc=example,dc=org@${LDAP_ROOT}@"  ${OPENLDAP_CONFIG_DIR}/base.ldif
+        sed -i "s@cn=search,dc=example,dc=org@${LDAP_SEARCH_DN}@"  ${OPENLDAP_CONFIG_DIR}/base.ldif
+        sed -i "s@123456@${LDAP_SEARCH_PASSWORD}@" ${OPENLDAP_CONFIG_DIR}/base.ldif
+        sed -i "s@dc=example,dc=org@${LDAP_BASE}@"  ${OPENLDAP_CONFIG_DIR}/base.ldif
+        sed -i "s@SEARCH_userPassword.*@userPassword: ${LDAP_SEARCH_ENCRYPTED}@"  ${OPENLDAP_CONFIG_DIR}/base.ldif
+        /usr/local/openldap-2.4.45/bin/ldapadd -Z -x -H ldap://127.0.0.1:389/ -D "${LDAP_ROOT}" -w ${LDAP_ROOT_PASSWORD}  -f ${OPENLDAP_CONFIG_DIR}/base.ldif
+        touch ${OPENLDAP_CONFIG_DIR}/load_base_ldif
     else
-        if [ ! -e ${OPENLDAP_CONFIG_DIR}/base.ldif ];then
-            mkdir ${OPENLDAP_CONFIG_DIR} -p
-            cp /usr/local/openldap-2.4.45/etc/openldap/base.ldif ${OPENLDAP_CONFIG_DIR}/
-            sed -i "s@cn=root,dc=example,dc=org@${LDAP_ROOT}@"  ${OPENLDAP_CONFIG_DIR}/base.ldif
-            sed -i "s@cn=search,dc=example,dc=org@${LDAP_SEARCH_DN}@"  ${OPENLDAP_CONFIG_DIR}/base.ldif
-            sed -i "s@123456@${LDAP_SEARCH_PASSWORD}@" ${OPENLDAP_CONFIG_DIR}/base.ldif
-            sed -i "s@dc=example,dc=org@${LDAP_BASE}@"  ${OPENLDAP_CONFIG_DIR}/base.ldif
-            sed -i "s@userPassword.*@userPassword: ${LDAP_SEARCH_ENCRYPTED}@"  ${OPENLDAP_CONFIG_DIR}/base.ldif
-            /usr/local/openldap-2.4.45/bin/ldapadd -Z -x -H ldap://127.0.0.1:389/ -D "${LDAP_ROOT}" -w ${LDAP_ROOT_PASSWORD}  -f ${OPENLDAP_CONFIG_DIR}/base.ldif 
-            touch ${OPENLDAP_CONFIG_DIR}/load_base_ldif
-        else
-            sed -i "s@cn=root,dc=example,dc=org@${LDAP_ROOT}@"  ${OPENLDAP_CONFIG_DIR}/base.ldif
-            sed -i "s@cn=search,dc=example,dc=org@${LDAP_SEARCH_DN}@"  ${OPENLDAP_CONFIG_DIR}/base.ldif
-            sed -i "s@123456@${LDAP_SEARCH_PASSWORD}@" ${OPENLDAP_CONFIG_DIR}/base.ldif
-            sed -i "s@dc=example,dc=org@${LDAP_BASE}@"  ${OPENLDAP_CONFIG_DIR}/base.ldif
-            sed -i "s@userPassword.*@userPassword: ${LDAP_SEARCH_ENCRYPTED}@"  ${OPENLDAP_CONFIG_DIR}/base.ldif
-            /usr/local/openldap-2.4.45/bin/ldapadd -Z -x -H ldap://127.0.0.1:389/ -D "${LDAP_ROOT}" -w ${LDAP_ROOT_PASSWORD}  -f ${OPENLDAP_CONFIG_DIR}/base.ldif 
-            touch ${OPENLDAP_CONFIG_DIR}/load_base_ldif
-        fi
+        sed -i "s@cn=root,dc=example,dc=org@${LDAP_ROOT}@"  ${OPENLDAP_CONFIG_DIR}/base.ldif
+        sed -i "s@cn=search,dc=example,dc=org@${LDAP_SEARCH_DN}@"  ${OPENLDAP_CONFIG_DIR}/base.ldif
+        sed -i "s@123456@${LDAP_SEARCH_PASSWORD}@" ${OPENLDAP_CONFIG_DIR}/base.ldif
+        sed -i "s@dc=example,dc=org@${LDAP_BASE}@"  ${OPENLDAP_CONFIG_DIR}/base.ldif
+        sed -i "s@SEARCH_userPassword.*@userPassword: ${LDAP_SEARCH_ENCRYPTED}@"  ${OPENLDAP_CONFIG_DIR}/base.ldif
+        /usr/local/openldap-2.4.45/bin/ldapadd -Z -x -H ldap://127.0.0.1:389/ -D "${LDAP_ROOT}" -w ${LDAP_ROOT_PASSWORD}  -f ${OPENLDAP_CONFIG_DIR}/base.ldif
+        touch ${OPENLDAP_CONFIG_DIR}/load_base_ldif
     fi
-
 }
 
 run_ldap(){
@@ -130,4 +124,3 @@ kill_openldap
 run_ldap
 
 exec "$@"
-
