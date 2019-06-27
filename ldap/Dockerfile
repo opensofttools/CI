@@ -1,23 +1,8 @@
-FROM alpine:3.7
+FROM alpine:3.10 AS builder
 
-MAINTAINER kirin <kirin_13@163.com>
-
-ENV OPENLDAP_VERSION=2.4.45
-
-VOLUME ["/etc/openldap/"]
-
-#download openldap and berkeleydb
-RUN wget http://download.oracle.com/berkeley-db/db-5.1.29.tar.gz -P /tmp \
-  && wget ftp://ftp.openldap.org/pub/OpenLDAP/openldap-release/openldap-2.4.45.tgz -P /tmp
+ENV OPENLDAP_VERSION=2.4.47 DB_VERSION=5.1.29
 
 RUN set -x \
-  && mkdir -vp \
-    /run/openldap \
-    /etc/openldap \
-    /etc/openldap/conf \
-    /etc/openldap/data \
-    /etc/openldap/logs \
-    /etc/openldap/run \
   && apk update \
   && apk add \
     libtool \
@@ -32,22 +17,26 @@ RUN set -x \
     cyrus-sasl-dev \
     perl-dev
 
+#download openldap and berkeleydb
+RUN wget http://download.oracle.com/berkeley-db/db-${DB_VERSION}.tar.gz -P /tmp \
+  && wget ftp://ftp.openldap.org/pub/OpenLDAP/openldap-release/openldap-${OPENLDAP_VERSION}.tgz -P /tmp
+
 #build berkeleydb
-RUN tar zxf /tmp/db-5.1.29.tar.gz -C /tmp \
-  && cd /tmp/db-5.1.29/build_unix \
-  && ../dist/configure --prefix=/usr/local/berkeleydb-5.1.29 \
+RUN tar zxf /tmp/db-${DB_VERSION}.tar.gz -C /tmp \
+  && cd /tmp/db-${DB_VERSION}/build_unix \
+  && ../dist/configure --prefix=/usr/local/berkeleydb-${DB_VERSION} \
   && make \
   && make install
 
 #build openldap
-RUN tar zxf /tmp/openldap-2.4.45.tgz -C /tmp \
-  && cd /tmp/openldap-2.4.45 \
-  && export CPPFLAGS=-I/usr/local/berkeleydb-5.1.29/include/ \
-  && export LDFLAGS=-L/usr/local/berkeleydb-5.1.29/lib \
-  && export LD_LIBRARY_PATH=/usr/local/berkeleydb-5.1.29/lib \
-  && ./configure --prefix=/usr/local/openldap-2.4.45 \
-        --datadir=/usr/local/openldap-2.4.45/openldap-data \
-        --mandir=/usr/local/openldap-2.4.45/man \
+RUN tar zxf /tmp/openldap-${OPENLDAP_VERSION}.tgz -C /tmp \
+  && cd /tmp/openldap-${OPENLDAP_VERSION} \
+  && export CPPFLAGS=-I/usr/local/berkeleydb-${DB_VERSION}/include/ \
+  && export LDFLAGS=-L/usr/local/berkeleydb-${DB_VERSION}/lib \
+  && export LD_LIBRARY_PATH=/usr/local/berkeleydb-${DB_VERSION}/lib \
+  && ./configure --prefix=/usr/local/openldap-${OPENLDAP_VERSION} \
+        --datadir=/usr/local/openldap-${OPENLDAP_VERSION}/openldap-data \
+        --mandir=/usr/local/openldap-${OPENLDAP_VERSION}/man \
         --with-odbc=auto \
         --enable-debug \
         --enable-syslog \
@@ -82,15 +71,48 @@ RUN tar zxf /tmp/openldap-2.4.45.tgz -C /tmp \
   && make \
   && make install
 
-RUN rm -vfr /var/cache/apk/* \
+
+FROM alpine:3.10
+
+MAINTAINER kirin <kirin_13@163.com>
+
+ENV OPENLDAP_VERSION=2.4.47 DB_VERSION=5.1.29
+
+RUN set -x \
+  && mkdir -vp \
+    /run/openldap \
+    /etc/openldap \
+    /etc/openldap/conf \
+    /etc/openldap/data \
+    /etc/openldap/logs \
+    /etc/openldap/run \
+  && apk update \
+  && apk add \
+    libtool \
+    openssl \
+    openssl-dev \
+    unixodbc-dev \
+    cyrus-sasl-dev \
+    groff \
+    g++ \
+    gcc \
+    make \
+    cyrus-sasl-dev \
+    perl-dev \
+  && rm -vfr /var/cache/apk/* \
   && rm -rf /tmp/*
 
+COPY --from=builder /usr/local/berkeleydb-${DB_VERSION} /usr/local/berkeleydb-${DB_VERSION}
+COPY --from=builder /usr/local/openldap-${OPENLDAP_VERSION} /usr/local/openldap-${OPENLDAP_VERSION}
 #fix read README.md "build berkeleydb" and "build openldap"
-COPY conf/base.ldif /usr/local/openldap-2.4.45/etc/openldap/
-COPY conf/ldap.conf /usr/local/openldap-2.4.45/etc/openldap/
-COPY conf/slapd.conf /usr/local/openldap-2.4.45/etc/openldap/
+COPY conf/base.ldif /usr/local/openldap-${OPENLDAP_VERSION}/etc/openldap/
+COPY conf/ldap.conf /usr/local/openldap-${OPENLDAP_VERSION}/etc/openldap/
+COPY conf/slapd.conf /usr/local/openldap-${OPENLDAP_VERSION}/etc/openldap/
 COPY conf/entrypoint.sh /usr/local/bin/
 
 EXPOSE 389 636
 
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+
+
+VOLUME ["/etc/openldap/"]

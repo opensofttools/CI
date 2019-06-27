@@ -30,20 +30,20 @@ objectClass: posixGroup
 gidNumber: 10000
 cn: rootgroup
 
-#dn: cn=root,ou=people,dc=example,dc=org
-#objectClass: posixAccount
-#objectClass: inetOrgPerson
-#objectClass: organizationalPerson
-#objectClass: person
-#objectClass: shadowAccount
-#loginShell: /bin/bash
-#homeDirectory: /root
-#uid: root
-#cn: root
-#sn: root
-#uidNumber: 10000
-#gidNumber: 10000
-#ROOT_userPassword: 123456
+dn: cn=root,ou=people,dc=example,dc=org
+objectClass: posixAccount
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: shadowAccount
+loginShell: /bin/bash
+homeDirectory: /root
+uid: root
+cn: root
+sn: root
+uidNumber: 10000
+gidNumber: 10000
+ROOT_userPassword: 123456
 
 dn: cn=group,ou=group,dc=example,dc=org
 objectClass: posixGroup
