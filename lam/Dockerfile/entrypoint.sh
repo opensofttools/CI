@@ -2,7 +2,7 @@
 
 export ULIMIT="2048"
 export NGINX_CONF_DIR="/etc/nginx/conf.d"
-export PHP_CONF_CIR="/etc/php5"
+export PHP_CONF_CIR="/etc/php7"
 export LAM_DIR="/usr/local/lam"
 export LAM_RUN_CONF_DIR="/etc/lam/conf"
 export LAM_RUN_FILE_DIR="/etc/lam/run"
@@ -44,13 +44,13 @@ create_dir(){
 
 replace_php_conf(){
     if [ -n "${PHP_CONF_IFLE}" ];then
-        ln -sf ${PHP_CONF_IFLE} /etc/php5/php-fpm.conf
+        ln -sf ${PHP_CONF_IFLE} /etc/php7/php-fpm.conf
         touch "${LAM_RUN_FILE_DIR}/php_replace"
     else
         if [ ! -e "${LAM_RUN_FILE_DIR}/php_replace" ];then
-            sed -i "s@user = nobody@user = ${LAM_RUN_USER}@" /etc/php5/php-fpm.conf
-            sed -i "s@group = nobody@group = ${LAM_RUN_GROUP}@" /etc/php5/php-fpm.conf
-            sed -i "s@;pid = run/php-fpm.pid@pid = run/php5/php-fpm.pid@" /etc/php5/php-fpm.conf
+            sed -i "s@user = nobody@user = ${LAM_RUN_USER}@" /etc/php7/php-fpm.conf
+            sed -i "s@group = nobody@group = ${LAM_RUN_GROUP}@" /etc/php7/php-fpm.conf
+            sed -i "s@;pid = run/php-fpm.pid@pid = run/php7/php-fpm.pid@" /etc/php7/php-fpm.conf
             touch "${LAM_RUN_FILE_DIR}/php_replace"
         fi
     fi
@@ -87,18 +87,21 @@ replace_lam_conf(){
 
 run_lam(){
     #change dir ower
+    chmod -R 777 /usr/local/lam/sess
+    chmod -R 777 /usr/local/lam/tmp
     chown -R ${LAM_RUN_USER}:${LAM_RUN_GROUP} /usr/local/lam
     chown -R ${LAM_RUN_USER}:${LAM_RUN_GROUP} ${LAM_RUN_CONF_DIR}/config.cfg
     chown -R ${LAM_RUN_USER}:${LAM_RUN_GROUP} ${LAM_RUN_CONF_DIR}/ldap.conf
+    chmod 777 /etc/lam/conf/*
 
     # run nginx
     nginx && touch "${LAM_RUN_FILE_DIR}/nginx_run"
 
-    #run php5
-    if [ -e "/run/php5/php-fpm.pid" ];then
-        pkill php-fpm && php-fpm5 && touch "${LAM_RUN_FILE_DIR}/nginx_run"
+    #run php7
+    if [ -e "/run/php7/php-fpm.pid" ];then
+        pkill php-fpm && php-fpm7 && touch "${LAM_RUN_FILE_DIR}/nginx_run"
     else
-        php-fpm5 && touch "${LAM_RUN_FILE_DIR}/php_run"
+        php-fpm7 && touch "${LAM_RUN_FILE_DIR}/php_run"
     fi
     touch ${LAM_RUN_LOG_DIR}/lam.log  && chown -R ${LAM_RUN_USER}:${LAM_RUN_GROUP} ${LAM_RUN_LOG_DIR}/lam.log
     tail -f ${LAM_RUN_LOG_DIR}/lam.log
