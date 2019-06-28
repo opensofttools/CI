@@ -14,7 +14,6 @@ RUN set -x \
     g++ \
     gcc \
     make \
-    cyrus-sasl-dev \
     perl-dev
 
 #download openldap and berkeleydb
@@ -90,24 +89,18 @@ RUN set -x \
   && apk add \
     libtool \
     openssl \
-    openssl-dev \
     unixodbc-dev \
     cyrus-sasl-dev \
-    groff \
-    g++ \
-    gcc \
-    make \
-    cyrus-sasl-dev \
-    perl-dev \
   && rm -vfr /var/cache/apk/* \
   && rm -rf /tmp/*
 
 COPY --from=builder /usr/local/berkeleydb-${DB_VERSION} /usr/local/berkeleydb-${DB_VERSION}
 COPY --from=builder /usr/local/openldap-${OPENLDAP_VERSION} /usr/local/openldap-${OPENLDAP_VERSION}
 #fix read README.md "build berkeleydb" and "build openldap"
-COPY conf/base.ldif /usr/local/openldap-${OPENLDAP_VERSION}/etc/openldap/
-COPY conf/ldap.conf /usr/local/openldap-${OPENLDAP_VERSION}/etc/openldap/
-COPY conf/slapd.conf /usr/local/openldap-${OPENLDAP_VERSION}/etc/openldap/
+COPY conf/* /usr/local/openldap-${OPENLDAP_VERSION}/etc/openldap/
+#COPY conf/base.ldif /usr/local/openldap-${OPENLDAP_VERSION}/etc/openldap/
+#COPY conf/ldap.conf /usr/local/openldap-${OPENLDAP_VERSION}/etc/openldap/
+#COPY conf/slapd.conf /usr/local/openldap-${OPENLDAP_VERSION}/etc/openldap/
 COPY conf/entrypoint.sh /usr/local/bin/
 
 EXPOSE 389 636
