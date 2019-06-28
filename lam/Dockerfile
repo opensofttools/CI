@@ -41,15 +41,17 @@ RUN set -x \
   	php7-json \
   	php7-gettext \
         php7-session \
-  	perl \
   && rm -rf /etc/nginx/conf.d/default.conf \
   && rm -vfr /var/cache/apk/* \
+  && rm -vfr /tmp/* \
   && chown -R www:www /usr/local/lam \
   && cp /usr/local/lam/etc/unix.conf.sample /usr/local/lam/etc/ldap.conf
 
-COPY config.cfg /usr/local/lam/etc
-COPY ldap.conf /usr/local/lam/etc
-ADD proxy_lam.conf /etc/nginx/conf.d/
-ADD entrypoint.sh /usr/local/bin/
+COPY conf/config.cfg /usr/local/lam/etc
+COPY conf/ldap.conf /usr/local/lam/etc
+ADD conf/proxy_lam.conf /etc/nginx/conf.d/
+ADD conf/entrypoint.sh /usr/local/bin/
 
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+
+EXPOSE 80 443
